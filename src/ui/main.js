@@ -28,7 +28,22 @@ let placementPreview = null;
 let hoverR = -1;
 let hoverC = -1;
 let waitingForTurn = false;
-let pendingTurnTimeout = null;
+const pendingTurnTimers = new Set();
+
+function scheduleTurn(fn, ms) {
+  const id = setTimeout(() => {
+    pendingTurnTimers.delete(id);
+    fn();
+  }, ms);
+  pendingTurnTimers.add(id);
+}
+
+function cancelPendingTurnTimers() {
+  for (const id of pendingTurnTimers) {
+    clearTimeout(id);
+  }
+  pendingTurnTimers.clear();
+}
 
 function render() {
   const app = document.getElementById('app');
@@ -181,7 +196,7 @@ function renderPlacementUI(app) {
     startGame(state);
     render();
     if (state.turn === 'ai') {
-      setTimeout(doAITurn, 500);
+      scheduleTurn(doAITurn, 500);
     }
   });
   panel.appendChild(startBtn);
@@ -338,15 +353,14 @@ function renderGameUI(app) {
       if (state.phase === 'gameover') return;
 
       waitingForTurn = true;
-      pendingTurnTimeout = setTimeout(() => {
-        pendingTurnTimeout = null;
+      scheduleTurn(() => {
         waitingForTurn = false;
         if (state.phase !== 'playing') return;
         switchTurn(state);
         render();
 
         if (state.turn === 'ai') {
-          setTimeout(doAITurn, 500);
+          scheduleTurn(doAITurn, 500);
         }
       }, 900);
     },
@@ -370,8 +384,7 @@ function doAITurn() {
 
   if (state.phase === 'gameover') return;
 
-  pendingTurnTimeout = setTimeout(() => {
-    pendingTurnTimeout = null;
+  scheduleTurn(() => {
     if (state.phase !== 'playing') return;
     switchTurn(state);
     render();
@@ -395,10 +408,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('click', (e) => {
   if (e.target.id === 'restart-link') {
     e.preventDefault();
-    if (pendingTurnTimeout != null) {
-      clearTimeout(pendingTurnTimeout);
-      pendingTurnTimeout = null;
-    }
+    cancelPendingTurnTimers();
     waitingForTurn = false;
     state = createInitialState();
     placementPreview = null;
