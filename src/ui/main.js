@@ -27,6 +27,7 @@ let state = createInitialState();
 let placementPreview = null;
 let hoverR = -1;
 let hoverC = -1;
+let waitingForTurn = false;
 
 function render() {
   const app = document.getElementById('app');
@@ -234,6 +235,20 @@ function renderPlacementUI(app) {
     placementPreview = null;
     hoverR = -1;
     hoverC = -1;
+    renderBoard(
+      playerBoard,
+      state,
+      state.player,
+      true,
+      (r2, c2) => {
+        if (state.phase !== 'placement') return;
+        if (placeShip(state, r2, c2)) {
+          placementPreview = null;
+          render();
+        }
+      },
+      null,
+    );
   });
 }
 
@@ -312,6 +327,7 @@ function renderGameUI(app) {
     false,
     (r, c) => {
       if (state.phase !== 'playing' || state.turn !== 'player') return;
+      if (waitingForTurn) return;
       const key = cellKey(r, c);
       if (state.player.shots.has(key)) return;
 
@@ -320,12 +336,16 @@ function renderGameUI(app) {
 
       if (state.phase === 'gameover') return;
 
-      switchTurn(state);
-      render();
+      waitingForTurn = true;
+      setTimeout(() => {
+        waitingForTurn = false;
+        switchTurn(state);
+        render();
 
-      if (state.turn === 'ai') {
-        setTimeout(doAITurn, 500);
-      }
+        if (state.turn === 'ai') {
+          setTimeout(doAITurn, 500);
+        }
+      }, 900);
     },
     null,
   );
@@ -347,8 +367,10 @@ function doAITurn() {
 
   if (state.phase === 'gameover') return;
 
-  switchTurn(state);
-  render();
+  setTimeout(() => {
+    switchTurn(state);
+    render();
+  }, 900);
 }
 
 // Keyboard handler
