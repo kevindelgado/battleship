@@ -28,6 +28,7 @@ let placementPreview = null;
 let hoverR = -1;
 let hoverC = -1;
 let waitingForTurn = false;
+let pendingTurnTimeout = null;
 
 function render() {
   const app = document.getElementById('app');
@@ -337,8 +338,10 @@ function renderGameUI(app) {
       if (state.phase === 'gameover') return;
 
       waitingForTurn = true;
-      setTimeout(() => {
+      pendingTurnTimeout = setTimeout(() => {
+        pendingTurnTimeout = null;
         waitingForTurn = false;
+        if (state.phase !== 'playing') return;
         switchTurn(state);
         render();
 
@@ -367,7 +370,9 @@ function doAITurn() {
 
   if (state.phase === 'gameover') return;
 
-  setTimeout(() => {
+  pendingTurnTimeout = setTimeout(() => {
+    pendingTurnTimeout = null;
+    if (state.phase !== 'playing') return;
     switchTurn(state);
     render();
   }, 900);
@@ -390,6 +395,11 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('click', (e) => {
   if (e.target.id === 'restart-link') {
     e.preventDefault();
+    if (pendingTurnTimeout != null) {
+      clearTimeout(pendingTurnTimeout);
+      pendingTurnTimeout = null;
+    }
+    waitingForTurn = false;
     state = createInitialState();
     placementPreview = null;
     hoverR = -1;
