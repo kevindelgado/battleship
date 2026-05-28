@@ -31,8 +31,10 @@ function getUnresolvedHits(state) {
 }
 
 function computeTargetParity(state, unsunkShips, sunkCells) {
+  const lmin = Math.min(...unsunkShips.map((s) => s.length));
   const counts = [0, 0];
   for (const ship of unsunkShips) {
+    if (ship.length !== lmin) continue;
     for (const orientation of ['horizontal', 'vertical']) {
       const maxR =
         orientation === 'vertical' ? ROWS - ship.length : ROWS - 1;
@@ -66,6 +68,8 @@ function computeTargetParity(state, unsunkShips, sunkCells) {
   }
   return counts[0] >= counts[1] ? 0 : 1;
 }
+
+export { computeTargetParity };
 
 export function chooseShot(state, _rng = Math.random) {
   const unsunkShips = getUnsunkShips(state.player.ships);
