@@ -48,10 +48,7 @@ export function renderBoard(
   }
   table.appendChild(headerRow);
 
-  const sideData = isOwn ? state.player : state.ai;
   const ships = isOwn ? state.player.ships : state.ai.ships;
-  // For the enemy board, the shots are the player's shots
-  const shotsMap = isOwn ? state.ai.shots : state.player.shots;
 
   for (let r = 0; r < ROWS; r++) {
     const tr = document.createElement('tr');

@@ -5,7 +5,7 @@ import {
   switchTurn,
 } from '../src/logic/game.js';
 import { cellKey } from '../src/logic/board.js';
-import { isSunk, allSunk } from '../src/logic/fleet.js';
+import { isSunk } from '../src/logic/fleet.js';
 
 function makeShip(id, name, length, cells) {
   return {
@@ -143,8 +143,6 @@ describe('immediate end-of-game termination (§246)', () => {
       aiShips,
       firstMove: 'player',
     });
-
-    const aiShotsBefore = state.ai.shots.size;
 
     // Player fires, hits
     applyShot(state, 'player', 5, 5);

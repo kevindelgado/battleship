@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chooseShot, updateAIAfterShot } from '../src/logic/ai/index.js';
-import { chooseShot as easyShot } from '../src/logic/ai/easy.js';
+
 import {
   chooseShot as mediumShot,
   updateAfterShot as mediumUpdate,
@@ -31,15 +31,15 @@ function makeShip(id, name, length, cells) {
 }
 
 function makeFullFleetState(difficulty, seed) {
-  const rng = seededRng(seed);
-  const playerShips = randomPlacement(FLEET, rng);
-  const aiShips = randomPlacement(FLEET, rng);
+  const fleetRng = seededRng(seed);
+  const playerShips = randomPlacement(FLEET, fleetRng);
+  const aiShips = randomPlacement(FLEET, fleetRng);
   return createGameState({
     playerShips,
     aiShips,
     difficulty,
     firstMove: 'player',
-    rng,
+    rng: fleetRng,
   });
 }
 
@@ -49,7 +49,6 @@ function makeFullFleetState(difficulty, seed) {
 describe('AI legality — all difficulties', () => {
   for (const difficulty of ['easy', 'medium', 'hard']) {
     it(`${difficulty}: never fires a previously-fired cell in a full game`, () => {
-      const rng = seededRng(42);
       const state = makeFullFleetState(difficulty, 42);
 
       const playerRng = seededRng(123);

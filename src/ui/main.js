@@ -8,11 +8,9 @@ import {
   placeShip,
   undoPlacement,
   toggleOrientation,
-  getCurrentShipDef,
 } from './input.js';
 import { FLEET } from '../logic/fleet.js';
 import {
-  randomPlacement,
   buildOccupiedSet,
   shipCells,
   isLegalPlacement,
@@ -318,7 +316,7 @@ function renderGameUI(app) {
       const key = cellKey(r, c);
       if (state.player.shots.has(key)) return;
 
-      const { result, sunkShip } = applyShot(state, 'player', r, c);
+      applyShot(state, 'player', r, c);
       render();
 
       if (state.phase === 'gameover') return;
