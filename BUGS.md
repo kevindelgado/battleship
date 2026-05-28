@@ -2,7 +2,61 @@
 
 ## Bugs encountered during development
 
-_(No bugs recorded yet — entries will be added as they are encountered during testing.)_
+### 1. RNG divisor caused intermittent game freeze
+
+**Symptom.** Occasionally and unpredictably, the AI would skip a turn entirely and the game would hang — no error in the console, no way to continue.
+
+**Root cause.** The seeded RNG in `src/ui/main.js` normalized its output by dividing the LCG state by `0xffffffff` (2³² − 1) instead of `0x100000000` (2³²). When the LCG happened to produce its maximum state, that division returned *exactly* `1.0`. Multiplying by an array length and flooring then produced `array.length` — an out-of-bounds index returning `undefined`. Inside `doAITurn`, an `undefined` shot triggered an early return that skipped the turn-handoff, leaving `state.turn === 'ai'` permanently. The same incorrect divisor was duplicated in two test helpers (`test/ai.test.js`, `test/placement.test.js`).
+
+**Fix.** Changed the divisor from `0xffffffff` to `0x100000000` so the normalized output is in `[0, 1)` rather than `[0, 1]`. Extracted `seededRng` into a new pure module `src/logic/rng.js` so it could be imported by both `main.js` and the test helpers — also a clean architectural improvement (pure logic out of the DOM file). The `& 0xffffffff` 32-bit state mask in the LCG update was deliberately left alone — that's a correct mask, not a divisor.
+
+**Test added.** `test/rng.test.js` crafts a seed that produces the exact maximum LCG state (`0xffffffff`) on its first call, asserts the output is strictly less than `1.0`, and sweeps 100k+ iterations confirming outputs are always in `[0, 1)` and derived indices are always in bounds. The test fails against the old divisor and passes against the fix.
+
+**How it was found.** Devin Review caught this on the initial PR. The build agent's own self-test reported "all tests passed, no issues found" — but the freeze only triggers on a specific RNG state that the seeded smoke runs didn't happen to hit. Useful reminder: a green test suite is only as strong as the states it actually exercises.
+
+### 2. Placement hover preview stopped tracking after first hover
+
+**Symptom.** During placement, the ship preview correctly highlighted on the first cell hovered, but didn't update as the mouse moved. It stayed stuck until something else (clicking, pressing R) triggered a re-render.
+
+**Root cause.** In `renderPlacementUI`, `mouseenter`/`mouseleave` handlers were attached individually to each `<td>` cell. When a hover fired, the handler called `renderBoard`, which does `container.innerHTML = ''` and rebuilds the cells. The new cells only had `click` handlers re-attached, not hover handlers — so after the first hover, no element on the page had a `mouseenter` listener left to fire.
+
+**Fix.** Replaced per-cell hover listeners with event delegation: one `mouseover`/`mouseout` listener attached to the parent `playerBoard`, which survives `innerHTML` rebuilds. The handler calls `e.target.closest('td')` to find the cell element, then reads `data-r`/`data-c` from it.
+
+**Test added.** `test/hover.test.js` (using `happy-dom` as a scoped dev dependency) mounts the board, fires a mouseover — the first hover triggers `renderBoard` (which rebuilds `innerHTML`), then a second hover on a different cell asserts the preview still updates — proving the delegated handler survives the `innerHTML` rebuild.
+
+**How it was found.** Also caught by Devin Review. Notably, the build agent's own self-test had flagged the underlying pattern in a `SKILL.md` note — *"the game re-renders the entire #app container on each state change, so DOM references become stale after actions"* — without recognizing it as a defect. The independent review pass connected that observation to a concrete bug. Spotting a code smell in your own work is not the same as fixing it.
+
+### 3. Shot-result status messages never visible to the user
+
+**Symptom.** "Hit!", "Miss.", and "You sank their <ship>" never appeared in the status area. Only "AI is thinking..." (after a player shot) and "Your turn." (after an AI shot) were ever displayed. The plan explicitly required announcing which ship was sunk; this requirement was silently violated.
+
+**Root cause.** A synchronous-render bug. In both the player click handler and `doAITurn`, the sequence was: `applyShot` (which sets the status to "Hit!" / "Miss." / "You sank their X") → `render()` → `switchTurn` (which overwrites the status to "AI is thinking..." or "Your turn.") → `render()` — all back-to-back in the same JavaScript tick. The browser only paints after the call stack empties, so only the final status ever reached the screen. Victory/defeat messages survived only because they return early before `switchTurn`.
+
+**Fix.** Introduced a short delay between displaying the shot result and switching turns. After `applyShot` and the first `render()`, the turn switch is scheduled via a tracked `setTimeout` (~900ms), giving the browser a paint cycle to display the result before the status changes. Input is guarded during the pause so a player can't fire again mid-delay.
+
+**How it was found.** Devin Review, second round. A bug class that purely unit tests cannot catch — it's about render timing, not logic, and the unit tests had been running entirely in synchronous JavaScript where the browser paint loop doesn't exist.
+
+### 4. Placement hover preview not visually cleared on mouseout
+
+**Symptom.** Moving the mouse off the player board during placement cleared the internal preview state, but the green/red highlight cells stayed lit in the DOM until some other action triggered a re-render.
+
+**Root cause.** The `mouseout` handler updated the JS state variables but never called `renderBoard()` (or `render()`), unlike its sibling `mouseover` handler which does trigger a render. State diverged from DOM.
+
+**Fix.** After clearing `placementPreview` to null on mouseout, call `renderBoard()` — matching what `mouseover` already does. The render brings the DOM back in sync with state.
+
+**How it was found.** Devin Review, second round. A small UX bug a casual player might not notice, but immediately visible to anyone moving the mouse deliberately.
+
+### 5. Pending timer callbacks corrupted state after restart
+
+**Symptom.** Clicking "New Game" during the brief pause between a shot and the turn switch could corrupt the freshly-created game state — e.g., place a freshly-started placement-phase game directly into "AI is thinking..." mode, or cause the AI to fire an extra shot on the first turn of a new game.
+
+**Root cause.** Two related issues, fixed together:
+- Multiple `setTimeout` calls in `main.js` (the 900ms result-display delays *and* the 500ms AI-turn kickoffs) captured the module-level `state` by reference. When a callback eventually fired, it operated on whatever `state` was at that moment — including a brand-new game in placement phase. `switchTurn` only short-circuited on `phase === 'gameover'`, not placement.
+- Some timeouts (the 900ms ones) had their IDs stored after a first fix attempt, but others (the 500ms ones) didn't — so the restart handler could only cancel some of them. Partial cleanup left stale timers alive.
+
+**Fix.** Centralized all turn-related timer scheduling behind small helpers (`scheduleTurn`/`cancelPendingTurnTimers`) so that *every* `setTimeout` in the turn flow is tracked through one mechanism. The restart handler cancels all pending turn-related timers in one call. Belt-and-suspenders: the `doAITurn` guard against `state.phase !== 'playing' || state.turn !== 'ai'` was kept so even an un-cancelled timer firing would no-op rather than corrupt state.
+
+**How it was found.** Two consecutive rounds of Devin Review — a partial fix in round 3 (the 900ms timers) revealed in round 4 that the 500ms timers had the same bug. The lesson, captured here in the writeup: an incomplete fix can introduce a new bug surface, and a second independent review pass is what catches it. The final fix centralized the pattern so the bug class is structurally eliminated, not just patched at each site.
 
 ## Known limitations / deliberate scope simplifications
 
