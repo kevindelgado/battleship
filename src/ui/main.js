@@ -21,19 +21,12 @@ import {
   isLegalPlacement,
 } from '../logic/placement.js';
 import { cellKey } from '../logic/board.js';
+import { seededRng } from '../logic/rng.js';
 
 let state = createInitialState();
 let placementPreview = null;
 let hoverR = -1;
 let hoverC = -1;
-
-function seededRng(seed) {
-  let s = seed;
-  return function () {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
-  };
-}
 
 function render() {
   const app = document.getElementById('app');
@@ -210,36 +203,37 @@ function renderPlacementUI(app) {
     placementPreview,
   );
 
-  // Add hover handlers for placement preview
-  const cells = playerBoard.querySelectorAll('td');
-  cells.forEach((td) => {
-    td.addEventListener('mouseenter', () => {
-      if (state.phase !== 'placement') return;
-      const r = parseInt(td.dataset.r);
-      const c = parseInt(td.dataset.c);
-      hoverR = r;
-      hoverC = c;
-      placementPreview = getPlacementPreview(state, r, c);
-      renderBoard(
-        playerBoard,
-        state,
-        state.player,
-        true,
-        (r2, c2) => {
-          if (state.phase !== 'placement') return;
-          if (placeShip(state, r2, c2)) {
-            placementPreview = null;
-            render();
-          }
-        },
-        placementPreview,
-      );
-    });
-    td.addEventListener('mouseleave', () => {
-      placementPreview = null;
-      hoverR = -1;
-      hoverC = -1;
-    });
+  // Event-delegated hover handlers for placement preview
+  playerBoard.addEventListener('mouseover', (e) => {
+    const td = e.target.closest('td');
+    if (!td || state.phase !== 'placement') return;
+    const r = parseInt(td.dataset.r);
+    const c = parseInt(td.dataset.c);
+    if (r === hoverR && c === hoverC) return;
+    hoverR = r;
+    hoverC = c;
+    placementPreview = getPlacementPreview(state, r, c);
+    renderBoard(
+      playerBoard,
+      state,
+      state.player,
+      true,
+      (r2, c2) => {
+        if (state.phase !== 'placement') return;
+        if (placeShip(state, r2, c2)) {
+          placementPreview = null;
+          render();
+        }
+      },
+      placementPreview,
+    );
+  });
+  playerBoard.addEventListener('mouseout', (e) => {
+    const related = e.relatedTarget;
+    if (related && playerBoard.contains(related)) return;
+    placementPreview = null;
+    hoverR = -1;
+    hoverC = -1;
   });
 }
 

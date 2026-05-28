@@ -14,14 +14,7 @@ import { randomPlacement } from '../src/logic/placement.js';
 import { FLEET } from '../src/logic/fleet.js';
 import { ROWS, COLS, cellKey, inBounds } from '../src/logic/board.js';
 import { isSunk } from '../src/logic/fleet.js';
-
-function seededRng(seed) {
-  let s = seed;
-  return function () {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
-  };
-}
+import { seededRng } from '../src/logic/rng.js';
 
 function makeShip(id, name, length, cells) {
   return {

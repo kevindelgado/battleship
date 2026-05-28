@@ -7,14 +7,7 @@ import {
 } from '../src/logic/placement.js';
 import { FLEET } from '../src/logic/fleet.js';
 import { cellKey } from '../src/logic/board.js';
-
-function seededRng(seed) {
-  let s = seed;
-  return function () {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
-  };
-}
+import { seededRng } from '../src/logic/rng.js';
 
 describe('shipCells', () => {
   it('generates horizontal cells', () => {
