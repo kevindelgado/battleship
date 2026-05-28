@@ -97,7 +97,7 @@ test/
 }
 ```
 
-Shots are stored per-firer. Hits/sunk derive from the *target's* ship list, so there's one authoritative record of ship cells and one record of where each side has fired.
+Shots are stored per-firer. Hits/sunk derive from the _target's_ ship list, so there's one authoritative record of ship cells and one record of where each side has fired.
 
 ## 6. Ship placement
 

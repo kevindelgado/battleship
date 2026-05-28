@@ -1,0 +1,358 @@
+/* ============================================
+   1. CSS Custom Properties
+   ============================================ */
+:root {
+  --navy-900: #0b1f3a;
+  --navy-700: #16335c;
+  --slate-500: #4a6076;
+  --sand-50: #f6efe1;
+  --sand-100: #ece2cc;
+  --ink-900: #1a1a1a;
+  --accent: #e8552b;
+  --accent-deep: #8a2a13;
+  --ok: #2f8a4a;
+  --bad: #b3341d;
+
+  --cell-size: 40px;
+  --gap: 1px;
+  --radius: 4px;
+  --board-padding: 8px;
+}
+
+/* ============================================
+   2. Reset / Base Typography
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    'Segoe UI',
+    Inter,
+    Roboto,
+    sans-serif;
+  background: var(--sand-50);
+  color: var(--ink-900);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--navy-900);
+  letter-spacing: 0.02em;
+}
+
+h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--navy-900);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy-900);
+  margin-bottom: 0.4rem;
+}
+
+/* ============================================
+   3. Layout
+   ============================================ */
+header {
+  text-align: center;
+  padding: 1.2rem 1rem 0.8rem;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--slate-500);
+}
+
+footer a {
+  color: var(--navy-700);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+.game-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.board-container {
+  background: var(--sand-100);
+  border-radius: var(--radius);
+  padding: var(--board-padding);
+  box-shadow: 0 2px 8px rgba(11, 31, 58, 0.12);
+}
+
+/* ============================================
+   4. Board and Cell Styles
+   ============================================ */
+.board {
+  border-collapse: collapse;
+  border: 2px solid var(--slate-500);
+  border-radius: var(--radius);
+}
+
+.board th {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--slate-500);
+  width: var(--cell-size);
+  height: var(--cell-size);
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 500;
+}
+
+.board .col-label {
+  height: 24px;
+}
+
+.board .row-label {
+  width: 24px;
+}
+
+/* ============================================
+   5. Cell-state Modifiers
+   ============================================ */
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: var(--gap) solid rgba(74, 96, 118, 0.25);
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 120ms ease-out;
+}
+
+.cell.water {
+  background: var(--navy-700);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.cell.ship {
+  background: var(--slate-500);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cell.miss {
+  background: var(--navy-700);
+}
+
+.cell.miss::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--slate-500);
+}
+
+.cell.hit {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+.cell.sunk {
+  background: var(--accent-deep);
+  transition: background-color 180ms ease-out;
+}
+
+.cell.preview-ok {
+  background: var(--ok) !important;
+  opacity: 0.8;
+}
+
+.cell.preview-bad {
+  background: var(--bad) !important;
+  opacity: 0.8;
+}
+
+/* ============================================
+   6. Placement Panel
+   ============================================ */
+.placement-panel {
+  background: var(--sand-100);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(11, 31, 58, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--navy-900);
+  white-space: nowrap;
+}
+
+.control-group select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--slate-500);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  background: white;
+}
+
+.ship-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ship-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ink-900);
+}
+
+.ship-item.placed {
+  opacity: 0.5;
+}
+
+.ship-name {
+  flex: 1;
+}
+
+.ship-dots {
+  color: var(--navy-700);
+  letter-spacing: 2px;
+  font-size: 0.7rem;
+}
+
+.ship-check {
+  color: var(--ok);
+  font-weight: 700;
+  width: 1rem;
+  text-align: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--slate-500);
+  border-radius: var(--radius);
+  background: white;
+  color: var(--navy-900);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 100ms;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--sand-50);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--navy-700);
+  color: white;
+  border-color: var(--navy-700);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--navy-900);
+}
+
+/* ============================================
+   7. Status + End-state Styles
+   ============================================ */
+.status {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--navy-900);
+  margin-top: 0.5rem;
+  min-height: 1.5em;
+}
+
+/* ============================================
+   8. Motion / Transitions
+   ============================================ */
+/* Hit/miss reveal: 120ms ease-out on .cell (see §5 above) */
+/* Sunk fill: 180ms ease-out on .cell.sunk (see §5 above) */
+/* Hover preview: instant (no transition) */
+
+@keyframes hit-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cell.hit {
+  animation: hit-pulse 120ms ease-out;
+}
+
+/* ============================================
+   9. Responsive
+   ============================================ */
+@media (max-width: 900px) {
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  :root {
+    --cell-size: 36px;
+  }
+}
