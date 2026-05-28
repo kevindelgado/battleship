@@ -1,7 +1,10 @@
 /** AI dispatch: difficulty -> chooseShot(state). Zero DOM references. */
 
 import { chooseShot as easyShot } from './easy.js';
-import { chooseShot as mediumShot, updateAfterShot as mediumUpdate } from './medium.js';
+import {
+  chooseShot as mediumShot,
+  updateAfterShot as mediumUpdate,
+} from './medium.js';
 import { chooseShot as hardShot } from './hard.js';
 
 export function chooseShot(state, rng = Math.random) {

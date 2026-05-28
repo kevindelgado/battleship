@@ -1,6 +1,10 @@
 /** Click/keyboard handlers, placement controller. DOM module. */
 
-import { shipCells, isLegalPlacement, buildOccupiedSet } from '../logic/placement.js';
+import {
+  shipCells,
+  isLegalPlacement,
+  buildOccupiedSet,
+} from '../logic/placement.js';
 import { FLEET } from '../logic/fleet.js';
 
 export function getCurrentShipDef(state) {

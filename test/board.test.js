@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { ROWS, COLS, inBounds, cellKey, parseKey, coordLabel } from '../src/logic/board.js';
+import {
+  ROWS,
+  COLS,
+  inBounds,
+  cellKey,
+  parseKey,
+  coordLabel,
+} from '../src/logic/board.js';
 
 describe('board', () => {
   it('has a 10x10 grid', () => {

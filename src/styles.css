@@ -31,7 +31,12 @@
 }
 
 body {
-  font-family: ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto,
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    'Segoe UI',
+    Inter,
+    Roboto,
     sans-serif;
   background: var(--sand-50);
   color: var(--ink-900);

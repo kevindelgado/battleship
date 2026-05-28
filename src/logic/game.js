@@ -30,7 +30,7 @@ export function createGameState({
       shots: new Map(),
       memory: {},
     },
-    status: turn === 'player' ? 'Your turn.' : "AI is thinking...",
+    status: turn === 'player' ? 'Your turn.' : 'AI is thinking...',
     winner: null,
   };
 }

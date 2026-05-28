@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  createGameState,
-  applyShot,
-  switchTurn,
-} from '../src/logic/game.js';
+import { createGameState, applyShot, switchTurn } from '../src/logic/game.js';
 import { cellKey } from '../src/logic/board.js';
 import { isSunk } from '../src/logic/fleet.js';
 

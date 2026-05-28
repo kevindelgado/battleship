@@ -1,6 +1,11 @@
 /** Bootstrap: build initial state, wire events, game loop. DOM module. */
 
-import { createInitialState, applyShot, switchTurn, startGame } from '../logic/game.js';
+import {
+  createInitialState,
+  applyShot,
+  switchTurn,
+  startGame,
+} from '../logic/game.js';
 import { chooseShot, updateAIAfterShot } from '../logic/ai/index.js';
 import { renderBoard, renderStatus } from './render.js';
 import {

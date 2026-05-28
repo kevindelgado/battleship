@@ -36,10 +36,8 @@ function computeTargetParity(state, unsunkShips, sunkCells) {
   for (const ship of unsunkShips) {
     if (ship.length !== lmin) continue;
     for (const orientation of ['horizontal', 'vertical']) {
-      const maxR =
-        orientation === 'vertical' ? ROWS - ship.length : ROWS - 1;
-      const maxC =
-        orientation === 'horizontal' ? COLS - ship.length : COLS - 1;
+      const maxR = orientation === 'vertical' ? ROWS - ship.length : ROWS - 1;
+      const maxC = orientation === 'horizontal' ? COLS - ship.length : COLS - 1;
       for (let r = 0; r <= maxR; r++) {
         for (let c = 0; c <= maxC; c++) {
           let valid = true;
@@ -48,10 +46,7 @@ function computeTargetParity(state, unsunkShips, sunkCells) {
             const cr = orientation === 'vertical' ? r + i : r;
             const cc = orientation === 'horizontal' ? c + i : c;
             const key = cellKey(cr, cc);
-            if (
-              state.ai.shots.get(key) === 'miss' ||
-              sunkCells.has(key)
-            ) {
+            if (state.ai.shots.get(key) === 'miss' || sunkCells.has(key)) {
               valid = false;
               break;
             }
@@ -87,10 +82,8 @@ export function chooseShot(state, _rng = Math.random) {
 
   for (const ship of unsunkShips) {
     for (const orientation of ['horizontal', 'vertical']) {
-      const maxR =
-        orientation === 'vertical' ? ROWS - ship.length : ROWS - 1;
-      const maxC =
-        orientation === 'horizontal' ? COLS - ship.length : COLS - 1;
+      const maxR = orientation === 'vertical' ? ROWS - ship.length : ROWS - 1;
+      const maxC = orientation === 'horizontal' ? COLS - ship.length : COLS - 1;
       for (let r = 0; r <= maxR; r++) {
         for (let c = 0; c <= maxC; c++) {
           let valid = true;
@@ -100,10 +93,7 @@ export function chooseShot(state, _rng = Math.random) {
             const cr = orientation === 'vertical' ? r + i : r;
             const cc = orientation === 'horizontal' ? c + i : c;
             const key = cellKey(cr, cc);
-            if (
-              state.ai.shots.get(key) === 'miss' ||
-              sunkCells.has(key)
-            ) {
+            if (state.ai.shots.get(key) === 'miss' || sunkCells.has(key)) {
               valid = false;
               break;
             }
@@ -118,16 +108,10 @@ export function chooseShot(state, _rng = Math.random) {
 
           for (const cell of cells) {
             if (!state.ai.shots.has(cell.key)) {
-              if (
-                !inTargetMode &&
-                (cell.r + cell.c) % 2 !== targetParity
-              ) {
+              if (!inTargetMode && (cell.r + cell.c) % 2 !== targetParity) {
                 continue;
               }
-              scores.set(
-                cell.key,
-                (scores.get(cell.key) || 0) + 1,
-              );
+              scores.set(cell.key, (scores.get(cell.key) || 0) + 1);
             }
           }
         }
@@ -138,10 +122,7 @@ export function chooseShot(state, _rng = Math.random) {
   let bestKey = null;
   let bestScore = -1;
   for (const [key, score] of scores) {
-    if (
-      score > bestScore ||
-      (score === bestScore && key < bestKey)
-    ) {
+    if (score > bestScore || (score === bestScore && key < bestKey)) {
       bestScore = score;
       bestKey = key;
     }

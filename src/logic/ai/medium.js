@@ -98,10 +98,7 @@ export function updateAfterShot(state, r, c, result, sunkShip) {
         mem.targetQueue = [];
         const leftC = cols[0] - 1;
         const rightC = cols[cols.length - 1] + 1;
-        if (
-          inBounds(row, leftC) &&
-          !state.ai.shots.has(cellKey(row, leftC))
-        ) {
+        if (inBounds(row, leftC) && !state.ai.shots.has(cellKey(row, leftC))) {
           mem.targetQueue.push({ r: row, c: leftC });
         }
         if (
@@ -117,10 +114,7 @@ export function updateAfterShot(state, r, c, result, sunkShip) {
         mem.targetQueue = [];
         const topR = rows[0] - 1;
         const bottomR = rows[rows.length - 1] + 1;
-        if (
-          inBounds(topR, col) &&
-          !state.ai.shots.has(cellKey(topR, col))
-        ) {
+        if (inBounds(topR, col) && !state.ai.shots.has(cellKey(topR, col))) {
           mem.targetQueue.push({ r: topR, c: col });
         }
         if (
@@ -151,9 +145,7 @@ function addOrthogonalNeighbors(state, r, c, mem) {
     const nr = r + d.r;
     const nc = c + d.c;
     if (inBounds(nr, nc) && !state.ai.shots.has(cellKey(nr, nc))) {
-      const already = mem.targetQueue.some(
-        (t) => t.r === nr && t.c === nc,
-      );
+      const already = mem.targetQueue.some((t) => t.r === nr && t.c === nc);
       if (!already) {
         mem.targetQueue.push({ r: nr, c: nc });
       }

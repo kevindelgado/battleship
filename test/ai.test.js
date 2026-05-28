@@ -5,7 +5,10 @@ import {
   chooseShot as mediumShot,
   updateAfterShot as mediumUpdate,
 } from '../src/logic/ai/medium.js';
-import { chooseShot as hardShot, computeTargetParity } from '../src/logic/ai/hard.js';
+import {
+  chooseShot as hardShot,
+  computeTargetParity,
+} from '../src/logic/ai/hard.js';
 import { createGameState, applyShot, switchTurn } from '../src/logic/game.js';
 import { randomPlacement } from '../src/logic/placement.js';
 import { FLEET } from '../src/logic/fleet.js';
@@ -326,9 +329,7 @@ describe('Hard AI behavior', () => {
 
       // Fire several hunt-mode shots and verify each satisfies the per-turn parity
       for (let i = 0; i < 15; i++) {
-        const unsunkShips = playerShips.filter(
-          (s) => s.hits.size < s.length,
-        );
+        const unsunkShips = playerShips.filter((s) => s.hits.size < s.length);
         if (unsunkShips.length === 0) break;
 
         const sunkCells = new Set();
@@ -362,9 +363,7 @@ describe('Hard AI behavior', () => {
         destroyer.hits.add(key);
       }
 
-      const unsunkAfter = playerShips.filter(
-        (s) => s.hits.size < s.length,
-      );
+      const unsunkAfter = playerShips.filter((s) => s.hits.size < s.length);
       if (unsunkAfter.length === 0) continue;
 
       const sunkCellsAfter = new Set();
@@ -473,8 +472,7 @@ describe('full-game smoke tests', () => {
               }
             }
             expect(unfired.length).toBeGreaterThan(0);
-            const target =
-              unfired[Math.floor(playerRng() * unfired.length)];
+            const target = unfired[Math.floor(playerRng() * unfired.length)];
             const key = cellKey(target.r, target.c);
 
             // No duplicate player shots
@@ -495,12 +493,7 @@ describe('full-game smoke tests', () => {
             expect(aiFired.has(key)).toBe(false);
             aiFired.add(key);
 
-            const { result, sunkShip } = applyShot(
-              state,
-              'ai',
-              shot.r,
-              shot.c,
-            );
+            const { result, sunkShip } = applyShot(state, 'ai', shot.r, shot.c);
             updateAIAfterShot(state, shot.r, shot.c, result, sunkShip);
             if (state.phase === 'gameover') break;
             switchTurn(state);
@@ -516,9 +509,7 @@ describe('full-game smoke tests', () => {
         const playerAllSunk = state.player.ships.every(
           (s) => s.hits.size === s.length,
         );
-        const aiAllSunk = state.ai.ships.every(
-          (s) => s.hits.size === s.length,
-        );
+        const aiAllSunk = state.ai.ships.every((s) => s.hits.size === s.length);
         expect(playerAllSunk || aiAllSunk).toBe(true);
         expect(playerAllSunk && aiAllSunk).toBe(false);
 
