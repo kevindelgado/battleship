@@ -90,6 +90,9 @@ function getShipOrigin(ship) {
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+/** Fraction of cell size used as inset so gridlines remain visible. */
+const INSET_RATIO = 0.06;
+
 function createShipSVG(ship, x, y, cellW, cellH, sunk) {
   const silhouette = SILHOUETTES[ship.id];
   if (!silhouette) return null;
@@ -100,9 +103,12 @@ function createShipSVG(ship, x, y, cellW, cellH, sunk) {
   svg.classList.add('ship-svg');
   svg.classList.add(sunk ? 'ship-svg-sunk' : 'ship-svg-own');
 
+  // Inset proportional to cell size so the board gridlines stay visible.
+  const inset = Math.min(cellW, cellH) * INSET_RATIO;
+
   svg.style.position = 'absolute';
-  svg.style.left = `${x}px`;
-  svg.style.top = `${y}px`;
+  svg.style.left = `${x + inset}px`;
+  svg.style.top = `${y + inset}px`;
   svg.style.pointerEvents = 'none';
 
   const [, , vbW, vbH] = silhouette.viewBox.split(' ').map(Number);
@@ -111,14 +117,14 @@ function createShipSVG(ship, x, y, cellW, cellH, sunk) {
 
   if (orientation === 'horizontal') {
     svg.setAttribute('viewBox', silhouette.viewBox);
-    svg.setAttribute('width', String(ship.length * cellW));
-    svg.setAttribute('height', String(cellH));
+    svg.setAttribute('width', String(ship.length * cellW - 2 * inset));
+    svg.setAttribute('height', String(cellH - 2 * inset));
   } else {
     // Vertical: swap viewBox dimensions and rotate the content.
     // rotate(-90) then translate(0, vbW) maps horizontal → vertical.
     svg.setAttribute('viewBox', `0 0 ${vbH} ${vbW}`);
-    svg.setAttribute('width', String(cellW));
-    svg.setAttribute('height', String(ship.length * cellH));
+    svg.setAttribute('width', String(cellW - 2 * inset));
+    svg.setAttribute('height', String(ship.length * cellH - 2 * inset));
 
     const g = document.createElementNS(SVG_NS, 'g');
     g.setAttribute('transform', `translate(0, ${vbW}) rotate(-90)`);

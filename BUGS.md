@@ -82,6 +82,16 @@ After the initial PR merged and the game went live, I played a full game on each
 
 **How it was found.** Manual playtesting of the deployed live URL, not Devin Review.
 
+### 8. Ship silhouettes cover board gridlines
+
+**Symptom.** Where a ship sat on the board, the gridlines disappeared — the SVG silhouette extended to the cell edges, erasing the 1px borders that separate cells. The rest of the board showed gridlines normally, so the effect was noticeable: ships looked like they were painted over the grid rather than placed on it.
+
+**Root cause.** In `createShipSVG`, the SVG element's width and height were set to the ship's full cell footprint (`ship.length × cellW` by `cellH`, or the transposed equivalent for vertical ships), with its position at the exact cell origin. This left zero margin between the silhouette and the cell borders, so the SVG covered the gridlines along its edges.
+
+**Fix.** Added a proportional inset (`INSET_RATIO = 0.06` of the smaller cell dimension) applied uniformly: the SVG position is offset inward by `inset` on both axes, and its width and height are each reduced by `2 × inset`. The inset scales with cell size (not hardcoded pixels) so it holds at both the 40px desktop and 36px mobile cell sizes. Applied identically in both orientations. The ship still renders as a single continuous hull — no internal gridlines between a ship's own cells — with the board's gridlines now visible around the ship's perimeter.
+
+**How it was found.** Manual playtesting of the deployed game after the ship-silhouette feature (PR #7) was merged, not Devin Review.
+
 ## Known limitations / deliberate scope simplifications
 
 ### Hard AI target-mode multi-ship adjacency heuristic
