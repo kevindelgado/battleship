@@ -90,7 +90,9 @@ After the initial PR merged and the game went live, I played a full game on each
 
 **Fix.** Added a proportional inset (`INSET_RATIO = 0.06` of the smaller cell dimension) applied uniformly: the SVG position is offset inward by `inset` on both axes, and its width and height are each reduced by `2 × inset`. The inset scales with cell size (not hardcoded pixels) so it holds at both the 40px desktop and 36px mobile cell sizes. Applied identically in both orientations. The ship still renders as a single continuous hull — no internal gridlines between a ship's own cells — with the board's gridlines now visible around the ship's perimeter.
 
-**How it was found.** Manual playtesting of the deployed game after the ship-silhouette feature (PR #7) was merged, not Devin Review.
+_Correction (follow-up):_ The initial inset fix also introduced a `ship-bg` background rect inside each SVG and set `.cell.ship` / `.cell.sunk` to `background: transparent`, intending the SVG rect to provide the ocean color. This caused the board-container's tan/parchment background (`--sand-100`) to bleed through the inset gap, making ships appear to sit on beige rectangles. Fixed by removing the `ship-bg` rect entirely and restoring `.cell.ship` and `.cell.sunk` backgrounds to `var(--navy-700)` (matching `.cell.water`), so ship cells are visually identical to empty water except for the silhouette drawn on top.
+
+**How it was found.** Manual playtesting of the deployed game after the ship-silhouette feature (PR #7) was merged, not Devin Review. The background bleed-through was caught in a subsequent playtest after the inset fix (PR #8) was merged.
 
 ## Known limitations / deliberate scope simplifications
 
