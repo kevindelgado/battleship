@@ -51,6 +51,7 @@ export function createInitialState(difficulty = 'easy') {
     },
     placement: {
       queue: FLEET.map((f) => f.id),
+      selectedId: FLEET[0].id,
       orientation: 'horizontal',
     },
     status: `Place your ${FLEET[0].name} (length ${FLEET[0].length}). Press R to rotate.`,

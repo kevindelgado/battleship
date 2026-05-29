@@ -9,8 +9,8 @@ import { FLEET } from '../logic/fleet.js';
 
 export function getCurrentShipDef(state) {
   if (!state.placement || state.placement.queue.length === 0) return null;
-  const nextId = state.placement.queue[0];
-  return FLEET.find((f) => f.id === nextId);
+  const id = state.placement.selectedId || state.placement.queue[0];
+  return FLEET.find((f) => f.id === id);
 }
 
 export function getPlacementPreview(state, r, c) {
@@ -41,12 +41,14 @@ export function placeShip(state, r, c) {
     hits: new Set(),
   });
 
-  state.placement.queue.shift();
+  state.placement.queue = state.placement.queue.filter((id) => id !== def.id);
 
   if (state.placement.queue.length > 0) {
+    state.placement.selectedId = state.placement.queue[0];
     const nextDef = getCurrentShipDef(state);
     state.status = `Place your ${nextDef.name} (length ${nextDef.length}). Press R to rotate.`;
   } else {
+    state.placement.selectedId = null;
     state.status = 'All ships placed. Press Start Game!';
   }
 
@@ -58,10 +60,20 @@ export function undoPlacement(state) {
 
   const removed = state.player.ships.pop();
   state.placement.queue.unshift(removed.id);
+  state.placement.selectedId = removed.id;
 
   const def = getCurrentShipDef(state);
   state.status = `Place your ${def.name} (length ${def.length}). Press R to rotate.`;
 
+  return true;
+}
+
+export function selectShip(state, shipId) {
+  if (!state.placement) return false;
+  if (!state.placement.queue.includes(shipId)) return false;
+  state.placement.selectedId = shipId;
+  const def = FLEET.find((f) => f.id === shipId);
+  state.status = `Place your ${def.name} (length ${def.length}). Press R to rotate.`;
   return true;
 }
 
