@@ -23,6 +23,7 @@ import {
 } from '../logic/placement.js';
 import { cellKey } from '../logic/board.js';
 import { seededRng } from '../logic/rng.js';
+import { renderShipOverlays } from './ships.js';
 
 let state = createInitialState();
 let placementPreview = null;
@@ -233,6 +234,7 @@ function renderPlacementUI(app) {
     },
     placementPreview,
   );
+  renderShipOverlays(playerBoard, state, true);
 
   // Event-delegated hover handlers for placement preview
   playerBoard.addEventListener('mouseover', (e) => {
@@ -258,6 +260,7 @@ function renderPlacementUI(app) {
       },
       placementPreview,
     );
+    renderShipOverlays(playerBoard, state, true);
   });
   playerBoard.addEventListener('mouseout', (e) => {
     const related = e.relatedTarget;
@@ -279,6 +282,7 @@ function renderPlacementUI(app) {
       },
       null,
     );
+    renderShipOverlays(playerBoard, state, true);
   });
 }
 
@@ -412,6 +416,10 @@ function renderGameUI(app) {
 
   container.appendChild(enemySection);
   app.appendChild(container);
+
+  // Ship SVG overlays (must run after container is in the DOM)
+  renderShipOverlays(playerBoard, state, true);
+  renderShipOverlays(enemyBoard, state, false);
 }
 
 function doAITurn() {
