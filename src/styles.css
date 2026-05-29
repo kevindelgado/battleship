@@ -274,8 +274,25 @@ footer a:hover {
   color: var(--ink-900);
 }
 
+.ship-item:not(.placed) {
+  cursor: pointer;
+}
+
+.ship-item:not(.placed):hover {
+  background: rgba(22, 51, 92, 0.08);
+  border-radius: var(--radius);
+}
+
+.ship-item.active {
+  background: rgba(22, 51, 92, 0.15);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--navy-700);
+  padding-left: 0.4rem;
+}
+
 .ship-item.placed {
   opacity: 0.5;
+  cursor: default;
 }
 
 .ship-name {

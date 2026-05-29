@@ -13,6 +13,7 @@ import {
   placeShip,
   undoPlacement,
   toggleOrientation,
+  selectShip,
 } from './input.js';
 import { FLEET } from '../logic/fleet.js';
 import {
@@ -135,7 +136,20 @@ function renderPlacementUI(app) {
     const item = document.createElement('div');
     item.className = 'ship-item';
     const placed = state.player.ships.some((s) => s.id === def.id);
-    if (placed) item.classList.add('placed');
+    if (placed) {
+      item.classList.add('placed');
+    } else {
+      if (state.placement.selectedId === def.id) {
+        item.classList.add('active');
+      }
+      item.addEventListener('click', () => {
+        selectShip(state, def.id);
+        placementPreview = null;
+        hoverR = -1;
+        hoverC = -1;
+        render();
+      });
+    }
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'ship-name';
@@ -303,6 +317,7 @@ function autoPlaceRemaining() {
   }
 
   state.placement.queue = [];
+  state.placement.selectedId = null;
   state.status = 'All ships placed. Press Start Game!';
 }
 
