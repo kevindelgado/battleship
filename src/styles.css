@@ -209,6 +209,23 @@ footer a:hover {
 }
 
 /* ============================================
+   5b. Enemy Board — Targeting & Disabled States
+   ============================================ */
+.cell.target-hover {
+  background: var(--slate-500);
+  cursor: crosshair;
+}
+
+.board-disabled {
+  opacity: 0.6;
+  transition: opacity 200ms ease-out;
+}
+
+.board-disabled .cell {
+  cursor: not-allowed;
+}
+
+/* ============================================
    6. Placement Panel
    ============================================ */
 .placement-panel {

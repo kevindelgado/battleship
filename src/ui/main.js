@@ -336,6 +336,15 @@ function renderGameUI(app) {
   enemyBoard.className = 'board-container';
   enemySection.appendChild(enemyBoard);
 
+  // Apply disabled visual when player cannot fire
+  if (
+    state.phase !== 'playing' ||
+    state.turn !== 'player' ||
+    waitingForTurn
+  ) {
+    enemyBoard.classList.add('board-disabled');
+  }
+
   renderBoard(
     enemyBoard,
     state,
@@ -366,6 +375,25 @@ function renderGameUI(app) {
     },
     null,
   );
+
+  // Delegated hover for enemy board targeting feedback
+  enemyBoard.addEventListener('mouseover', (e) => {
+    const td = e.target.closest('td');
+    if (!td) return;
+    if (
+      state.phase !== 'playing' ||
+      state.turn !== 'player' ||
+      waitingForTurn
+    )
+      return;
+    if (!td.classList.contains('water')) return;
+    td.classList.add('target-hover');
+  });
+  enemyBoard.addEventListener('mouseout', (e) => {
+    const td = e.target.closest('td');
+    if (!td) return;
+    td.classList.remove('target-hover');
+  });
 
   container.appendChild(enemySection);
   app.appendChild(container);
