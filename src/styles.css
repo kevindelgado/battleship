@@ -171,7 +171,8 @@ footer a:hover {
 }
 
 .cell.ship {
-  background: transparent;
+  background: var(--navy-700);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .cell.miss {
@@ -196,7 +197,7 @@ footer a:hover {
 }
 
 .cell.sunk {
-  background: transparent;
+  background: var(--accent-deep);
   transition: background-color 180ms ease-out;
 }
 
@@ -366,7 +367,7 @@ footer a:hover {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
 }
 
 .ship-svg path {
@@ -374,19 +375,9 @@ footer a:hover {
   stroke-width: 2;
 }
 
-/* Own ships: navy ocean background, lighter silhouette */
-.ship-svg-own .ship-bg {
-  fill: var(--navy-700);
-}
-
 .ship-svg-own path {
   fill: rgba(180, 195, 215, 0.45);
   stroke: rgba(255, 255, 255, 0.3);
-}
-
-/* Sunk ships: deep red background, brighter silhouette */
-.ship-svg-sunk .ship-bg {
-  fill: var(--accent-deep);
 }
 
 .ship-svg-sunk path {
