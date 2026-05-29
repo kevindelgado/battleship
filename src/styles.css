@@ -171,8 +171,7 @@ footer a:hover {
 }
 
 .cell.ship {
-  background: var(--navy-700);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  background: transparent;
 }
 
 .cell.miss {
@@ -197,8 +196,7 @@ footer a:hover {
 }
 
 .cell.sunk {
-  background: var(--navy-700);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  background: transparent;
   transition: background-color 180ms ease-out;
 }
 
@@ -376,9 +374,17 @@ footer a:hover {
   stroke-width: 2;
 }
 
+.ship-svg-own .ship-bg {
+  fill: var(--navy-700);
+}
+
 .ship-svg-own path {
   fill: rgba(180, 195, 215, 0.45);
   stroke: rgba(255, 255, 255, 0.3);
+}
+
+.ship-svg-sunk .ship-bg {
+  fill: var(--accent-deep);
 }
 
 .ship-svg-sunk path {

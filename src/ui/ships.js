@@ -106,31 +106,55 @@ function createShipSVG(ship, x, y, cellW, cellH, sunk) {
   // Inset proportional to cell size so the board gridlines stay visible.
   const inset = Math.min(cellW, cellH) * INSET_RATIO;
 
+  // Outer SVG covers the FULL cell footprint (no inset on position/size)
+  // so the ship-bg rect fills all cells with navy, preventing the tan
+  // board-container background from bleeding through the inset gap.
+  // A nested <svg> inside provides the visual inset for the paths.
+  const fullW = orientation === 'horizontal'
+    ? ship.length * cellW : cellW;
+  const fullH = orientation === 'horizontal'
+    ? cellH : ship.length * cellH;
+
   svg.style.position = 'absolute';
-  svg.style.left = `${x + inset}px`;
-  svg.style.top = `${y + inset}px`;
+  svg.style.left = `${x}px`;
+  svg.style.top = `${y}px`;
   svg.style.pointerEvents = 'none';
+  svg.setAttribute('width', String(fullW));
+  svg.setAttribute('height', String(fullH));
+  svg.setAttribute('viewBox', `0 0 ${fullW} ${fullH}`);
+
+  // Background rect matching ocean / sunk color, fills the full cell
+  // footprint so no container background shows through the inset gap.
+  const bg = document.createElementNS(SVG_NS, 'rect');
+  bg.classList.add('ship-bg');
+  bg.setAttribute('width', String(fullW));
+  bg.setAttribute('height', String(fullH));
+  svg.appendChild(bg);
+
+  // Inner SVG for silhouette paths, inset within the outer SVG.
+  const inner = document.createElementNS(SVG_NS, 'svg');
+  inner.setAttribute('x', String(inset));
+  inner.setAttribute('y', String(inset));
+  inner.setAttribute('width', String(fullW - 2 * inset));
+  inner.setAttribute('height', String(fullH - 2 * inset));
 
   const [, , vbW, vbH] = silhouette.viewBox.split(' ').map(Number);
 
-  let pathParent = svg; // paths attach here (directly or via <g>)
+  let pathParent = inner; // paths attach here (directly or via <g>)
 
   if (orientation === 'horizontal') {
-    svg.setAttribute('viewBox', silhouette.viewBox);
-    svg.setAttribute('width', String(ship.length * cellW - 2 * inset));
-    svg.setAttribute('height', String(cellH - 2 * inset));
+    inner.setAttribute('viewBox', silhouette.viewBox);
   } else {
     // Vertical: swap viewBox dimensions and rotate the content.
-    // rotate(-90) then translate(0, vbW) maps horizontal → vertical.
-    svg.setAttribute('viewBox', `0 0 ${vbH} ${vbW}`);
-    svg.setAttribute('width', String(cellW - 2 * inset));
-    svg.setAttribute('height', String(ship.length * cellH - 2 * inset));
+    inner.setAttribute('viewBox', `0 0 ${vbH} ${vbW}`);
 
     const g = document.createElementNS(SVG_NS, 'g');
     g.setAttribute('transform', `translate(0, ${vbW}) rotate(-90)`);
-    svg.appendChild(g);
+    inner.appendChild(g);
     pathParent = g;
   }
+
+  svg.appendChild(inner);
 
   for (const d of silhouette.paths) {
     const path = document.createElementNS(SVG_NS, 'path');
