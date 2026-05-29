@@ -114,6 +114,7 @@ footer a:hover {
 }
 
 .board-container {
+  position: relative;
   background: var(--sand-100);
   border-radius: var(--radius);
   padding: var(--board-padding);
@@ -124,6 +125,8 @@ footer a:hover {
    4. Board and Cell Styles
    ============================================ */
 .board {
+  position: relative;
+  z-index: 1;
   border-collapse: collapse;
   border: 2px solid var(--slate-500);
   border-radius: var(--radius);
@@ -168,8 +171,7 @@ footer a:hover {
 }
 
 .cell.ship {
-  background: var(--slate-500);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
 }
 
 .cell.miss {
@@ -194,7 +196,7 @@ footer a:hover {
 }
 
 .cell.sunk {
-  background: var(--accent-deep);
+  background: transparent;
   transition: background-color 180ms ease-out;
 }
 
@@ -352,6 +354,44 @@ footer a:hover {
   color: var(--navy-900);
   margin-top: 0.5rem;
   min-height: 1.5em;
+}
+
+/* ============================================
+   5c. Ship SVG Silhouette Overlays
+   ============================================ */
+.ship-svg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ship-svg path {
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+/* Own ships: navy ocean background, lighter silhouette */
+.ship-svg-own .ship-bg {
+  fill: var(--navy-700);
+}
+
+.ship-svg-own path {
+  fill: rgba(180, 195, 215, 0.45);
+  stroke: rgba(255, 255, 255, 0.3);
+}
+
+/* Sunk ships: deep red background, brighter silhouette */
+.ship-svg-sunk .ship-bg {
+  fill: var(--accent-deep);
+}
+
+.ship-svg-sunk path {
+  fill: rgba(255, 140, 120, 0.4);
+  stroke: rgba(255, 255, 255, 0.15);
 }
 
 /* ============================================
