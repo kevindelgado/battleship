@@ -92,6 +92,26 @@ After the initial PR merged and the game went live, I played a full game on each
 
 **How it was found.** Manual playtesting of the deployed game after the ship-silhouette feature (PR #7) was merged, not Devin Review.
 
+### 9. Hit markers completely hide ship silhouettes
+
+**Symptom.** When a player ship cell was hit, it rendered as a solid orange block with no trace of the ship silhouette. The player couldn't tell which ship was hit — only that *something* was hit there. Same for partially-sunk ships: every hit cell was an opaque orange square, hiding the ship's shape until the entire ship sank and flipped to the sunk treatment.
+
+**Root cause.** The SVG silhouette overlay sat at `z-index: 0` (behind the board table at `z-index: 1`). Hit cells were styled with an opaque orange background (`background: var(--accent)`). Since the cell was in the table layer above the SVG layer, the solid background completely covered the silhouette behind it. The `cellClass` function returned `'cell hit'` — not both `ship` and `hit` — so the cell had no transparency for the SVG to show through.
+
+**Fix.** Moved `.ship-svg-overlay` from `z-index: 0` to `z-index: 2`, placing silhouettes *above* the table. Cells are now opaque (`.cell.ship` matches `.cell.water` with navy background; `.cell.sunk` uses `--accent-deep`), and the semi-transparent silhouette paths overlay on top — blending visibly with whatever cell background is underneath. Removed the `ship-bg` rect from `createShipSVG()` since cells now provide their own backgrounds. The semi-transparent path fills (`rgba(180, 195, 215, 0.45)` for own, `rgba(255, 140, 120, 0.4)` for sunk) naturally tint the cell background so both the hit marker and the ship shape are visible together.
+
+**How it was found.** Manual playtesting of the deployed game after the ship-silhouette and inset features (PRs #7–#8) were merged, not Devin Review.
+
+### 10. Gridlines render inconsistently on and around ship cells
+
+**Symptom.** On ships that hadn't been hit, the gridlines within and around the ship's footprint were visually inconsistent — some partially visible, some broken — compared to the uniform gridlines on empty water cells. Ships looked like they disrupted the grid rather than sitting on it.
+
+**Root cause.** Ship cells had `background: transparent` (so the SVG behind them could show through), while water cells had `background: var(--navy-700)`. The board uses semi-transparent cell borders (`rgba(74, 96, 118, 0.25)` at 1px with `border-collapse: collapse`). These borders composite against adjacent cell backgrounds — a transparent ship cell next to an opaque water cell produced a visibly different gridline than two opaque water cells. Additionally, water cells had `box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15)` for subtle depth, but ship cells lacked this, compounding the inconsistency.
+
+**Fix.** Changed `.cell.ship` to match `.cell.water` exactly: `background: var(--navy-700)` plus the same inset `box-shadow`. With both cell types sharing identical backgrounds and shadows, semi-transparent borders composite uniformly across the entire board. This was enabled by the z-index flip in entry #9 — since silhouettes now render above the table, cells no longer need to be transparent for ships to show through.
+
+**How it was found.** Manual playtesting of the deployed game, same session as entry #9, not Devin Review.
+
 ## Known limitations / deliberate scope simplifications
 
 ### Hard AI target-mode multi-ship adjacency heuristic
@@ -100,7 +120,7 @@ The Hard AI's target-mode rule requires that a consistent placement covers **at 
 
 ### Sunk-ship visual is per-cell fill only
 
-v1 renders sunk ships by changing each cell's fill to `--accent-deep`. No single outline is drawn around the entire ship footprint (which would require SVG overlay or computed per-edge borders). This is a noted nice-to-have, not built in v1.
+_Resolved in PR #7:_ v1 originally rendered sunk ships by changing each cell's fill to `--accent-deep` with no ship outline. PR #7 added inline SVG silhouettes — sunk ships now display their full silhouette shape in a red-tinted treatment (`--accent-deep` cell fill + semi-transparent red silhouette overlay).
 
 ### Touch device placement UX
 

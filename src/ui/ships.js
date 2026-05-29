@@ -132,16 +132,6 @@ function createShipSVG(ship, x, y, cellW, cellH, sunk) {
     pathParent = g;
   }
 
-  // Background rect matching ocean / sunk color so the ship area
-  // blends with the surrounding board instead of showing through
-  // to the container background.  Always added directly to the <svg>
-  // (not inside the rotated <g>) so it fills the actual viewport.
-  const bg = document.createElementNS(SVG_NS, 'rect');
-  bg.classList.add('ship-bg');
-  bg.setAttribute('width', '100%');
-  bg.setAttribute('height', '100%');
-  svg.insertBefore(bg, svg.firstChild);
-
   for (const d of silhouette.paths) {
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', d);
