@@ -58,6 +58,30 @@
 
 **How it was found.** Two consecutive rounds of Devin Review — a partial fix in round 3 (the 900ms timers) revealed in round 4 that the 500ms timers had the same bug. The lesson, captured here in the writeup: an incomplete fix can introduce a new bug surface, and a second independent review pass is what catches it. The final fix centralized the pattern so the bug class is structurally eliminated, not just patched at each site.
 
+## Playtest findings (UX gaps caught after initial deploy)
+
+After the initial PR merged and the game went live, I played a full game on each difficulty. The defects fixed in Devin Review (above) all held up. These two UX gaps surfaced — minor, but visible enough to a real player that they belonged in a small follow-up PR rather than being deferred to the visual polish work.
+
+### 6. Enemy board lacks hover feedback during player's turn
+
+**Symptom.** During the player's turn, hovering over enemy cells gave no visual cue that clicking would fire a shot. After tabbing away and back, the player couldn't tell whether the board was interactive without clicking.
+
+**Root cause.** No hover style existed for the enemy board. The placement board had delegated hover handlers for ship preview, but the enemy board had only click handlers — no visual feedback on mouseover.
+
+**Fix.** Added a delegated `mouseover`/`mouseout` listener on the enemy `board-container` element (same pattern as the placement hover). The `mouseover` handler calls `e.target.closest('td')`, checks that the cell has the `water` class (unfired), and guards on `state.phase === 'playing'`, `state.turn === 'player'`, and `!waitingForTurn` before adding a `target-hover` CSS class. The `mouseout` handler removes it. The `target-hover` style uses the existing `--slate-500` color and a `crosshair` cursor — no new colors or animations.
+
+**How it was found.** Manual playtesting of the deployed live URL, not Devin Review.
+
+### 7. Enemy board looks identical whether the player can fire or not
+
+**Symptom.** While the AI was thinking or during the post-shot result pause, the enemy board looked exactly like it did on the player's turn. Clicks silently did nothing, with no visual explanation.
+
+**Root cause.** The JS click handler correctly guarded against firing during the AI's turn and during the `waitingForTurn` pause, but there was no corresponding visual feedback — the board's appearance was identical in active and inactive states.
+
+**Fix.** In `renderGameUI`, when the player cannot fire (`state.phase !== 'playing'`, `state.turn !== 'player'`, or `waitingForTurn` is set), a `board-disabled` CSS class is applied to the enemy `board-container`. The class sets `opacity: 0.6` with a 200ms transition and `cursor: not-allowed` on cells. Pointer events remain enabled — the JS guards remain the source of truth; the CSS is purely visual feedback. The class is absent when control returns to the player (each `render()` call rebuilds the DOM, so the class is only applied when the guard conditions are true at render time).
+
+**How it was found.** Manual playtesting of the deployed live URL, not Devin Review.
+
 ## Known limitations / deliberate scope simplifications
 
 ### Hard AI target-mode multi-ship adjacency heuristic
