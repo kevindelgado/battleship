@@ -2,9 +2,13 @@
 
 A single-player Battleship game (human vs. algorithmic AI) delivered as a static web app with three difficulty levels.
 
+**▶ [Play the game](https://kevindelgado.github.io/battleship/)**
+
+See [BUGS.md](BUGS.md) for bugs found and fixed during development.
+
 ## Play
 
-Visit the deployed game: `https://<your-username>.github.io/battleship/`
+Visit the deployed game: [https://kevindelgado.github.io/battleship/](https://kevindelgado.github.io/battleship/)
 
 Or run locally:
 
